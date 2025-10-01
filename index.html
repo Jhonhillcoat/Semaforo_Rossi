@@ -1,0 +1,998 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>Semáforo SWA Rossi - Gemelo Digital | Laboratorio Clínico</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-microscope"></i>
+                    <h1>Semáforo SWA Rossi</h1>
+                    <span class="subtitle">Gemelo Digital</span>
+                </div>
+                <div class="system-status">
+                    <div class="status-indicator" id="systemStatus">
+                        <span class="status-dot"></span>
+                        <span class="status-text">Sistema Operativo</span>
+                    </div>
+                    <div class="timestamp" id="lastUpdate">
+                        Última actualización: <span id="updateTime"></span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Main Dashboard -->
+        <main class="dashboard">
+            <!-- System Overview -->
+            <section class="system-overview">
+                <h2>Estado General del Sistema</h2>
+                <div class="overview-cards">
+                    <div class="overview-card">
+                        <div class="card-icon operational">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 id="operationalCount">0</h3>
+                            <p>Módulos Operativos</p>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon maintenance">
+                            <i class="fas fa-tools"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 id="maintenanceCount">0</h3>
+                            <p>En Mantenimiento</p>
+                        </div>
+                    </div>
+                    <div class="overview-card">
+                        <div class="card-icon standby">
+                            <i class="fas fa-pause-circle"></i>
+                        </div>
+                        <div class="card-content">
+                            <h3 id="standbyCount">0</h3>
+                            <p>En Stand By</p>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Core Systems -->
+            <section class="cores-section">
+                <h2>Sistemas Core</h2>
+                
+                <!-- Core 1 -->
+                <div class="core-system" data-core="core1">
+                    <div class="core-container">
+                        <div class="core-header-section">
+                            <div class="core-main-header">
+                                <div class="core-icon-large">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="core-main-info">
+                                    <h2>Core Línea 1</h2>
+                                    <p>Sistema completo ISE + C702 + C502 + e801</p>
+                                </div>
+                                <div class="core-main-status" id="core1-status">
+                                    <span class="status-dot operational"></span>
+                                </div>
+                            </div>
+                            <div class="core-main-details">
+                                <div class="detail-item">
+                                    <span class="label">Estado del Core:</span>
+                                    <span class="value" id="core1-state">Operativo</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Última modificación:</span>
+                                    <span class="value" id="core1-last-change">15:30 - 15/01/2024</span>
+                                </div>
+                            </div>
+                            <div class="core-comments">
+                                <div class="comments-header">
+                                    <h5><i class="fas fa-comments"></i> Comentarios del Core</h5>
+                                    <button class="btn btn-sm btn-primary" onclick="addCoreComment('core1')">
+                                        <i class="fas fa-plus"></i> Agregar
+                                    </button>
+                                </div>
+                                        <div class="comments-list" id="core1-comments">
+                                        </div>
+                            </div>
+                            <div class="core-main-actions">
+                                <button class="btn btn-secondary" onclick="changeCoreStatus('core1')">
+                                    <i class="fas fa-cog"></i> Cambiar Estado del Core
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modules-within-core">
+                            <h3>Módulos del Core</h3>
+                            <div class="modules-grid-internal">
+                                <!-- ISE Module -->
+                                <div class="module-card-internal" data-module="core1-ise">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-flask"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>ISE</h4>
+                                            <p>Electrolitos</p>
+                                        </div>
+                                        <div class="module-status" id="core1-ise-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core1-ise-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core1-ise-last-change">15:30 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core1-ise')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core1-ise-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core1-ise')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- C702 Module -->
+                                <div class="module-card-internal" data-module="core1-c702">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-vial"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>C702</h4>
+                                            <p>Química Clínica</p>
+                                        </div>
+                                        <div class="module-status" id="core1-c702-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core1-c702-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core1-c702-last-change">15:28 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core1-c702')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core1-c702-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core1-c702')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- C502 Module -->
+                                <div class="module-card-internal" data-module="core1-c502">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-vial"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>C502</h4>
+                                            <p>Química Clínica</p>
+                                        </div>
+                                        <div class="module-status" id="core1-c502-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core1-c502-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core1-c502-last-change">15:32 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core1-c502')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core1-c502-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core1-c502')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- e801 #1 Module -->
+                                <div class="module-card-internal" data-module="core1-e801-1">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-dna"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>e801 #1</h4>
+                                            <p>Inmunoensayos</p>
+                                        </div>
+                                        <div class="module-status" id="core1-e801-1-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core1-e801-1-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core1-e801-1-last-change">15:25 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core1-e801-1')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core1-e801-1-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core1-e801-1')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core 2 -->
+                <div class="core-system" data-core="core2">
+                    <div class="core-container">
+                        <div class="core-header-section">
+                            <div class="core-main-header">
+                                <div class="core-icon-large">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="core-main-info">
+                                    <h2>Core Línea 2</h2>
+                                    <p>Sistema completo ISE + C702 + e801 + e801</p>
+                                </div>
+                                <div class="core-main-status" id="core2-status">
+                                    <span class="status-dot operational"></span>
+                                </div>
+                            </div>
+                            <div class="core-main-details">
+                                <div class="detail-item">
+                                    <span class="label">Estado del Core:</span>
+                                    <span class="value" id="core2-state">Operativo</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Última modificación:</span>
+                                    <span class="value" id="core2-last-change">15:30 - 15/01/2024</span>
+                                </div>
+                            </div>
+                            <div class="core-comments">
+                                <div class="comments-header">
+                                    <h5><i class="fas fa-comments"></i> Comentarios del Core</h5>
+                                    <button class="btn btn-sm btn-primary" onclick="addCoreComment('core2')">
+                                        <i class="fas fa-plus"></i> Agregar
+                                    </button>
+                                </div>
+                                <div class="comments-list" id="core2-comments">
+                                    <div class="comment-item">
+                                        <div class="comment-text">Sistema funcionando correctamente</div>
+                                        <div class="comment-meta">15:30 - 15/01/2024</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="core-main-actions">
+                                <button class="btn btn-secondary" onclick="changeCoreStatus('core2')">
+                                    <i class="fas fa-cog"></i> Cambiar Estado del Core
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modules-within-core">
+                            <h3>Módulos del Core</h3>
+                            <div class="modules-grid-internal">
+                                <!-- ISE Module -->
+                                <div class="module-card-internal" data-module="core2-ise">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-flask"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>ISE</h4>
+                                            <p>Electrolitos</p>
+                                        </div>
+                                        <div class="module-status" id="core2-ise-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core2-ise-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core2-ise-last-change">15:30 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core2-ise')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core2-ise-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core2-ise')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- C702 Module -->
+                                <div class="module-card-internal" data-module="core2-c702">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-vial"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>C702</h4>
+                                            <p>Química Clínica</p>
+                                        </div>
+                                        <div class="module-status" id="core2-c702-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core2-c702-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core2-c702-last-change">15:28 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core2-c702')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core2-c702-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core2-c702')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- e801 #1 Module -->
+                                <div class="module-card-internal" data-module="core2-e801-1">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-dna"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>e801 #1</h4>
+                                            <p>Inmunoensayos</p>
+                                        </div>
+                                        <div class="module-status" id="core2-e801-1-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core2-e801-1-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core2-e801-1-last-change">15:25 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core2-e801-1')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core2-e801-1-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core2-e801-1')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- e801 #2 Module -->
+                                <div class="module-card-internal" data-module="core2-e801-2">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-dna"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>e801 #2</h4>
+                                            <p>Inmunoensayos</p>
+                                        </div>
+                                        <div class="module-status" id="core2-e801-2-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core2-e801-2-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core2-e801-2-last-change">15:32 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core2-e801-2')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core2-e801-2-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core2-e801-2')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core 3 -->
+                <div class="core-system" data-core="core3">
+                    <div class="core-container">
+                        <div class="core-header-section">
+                            <div class="core-main-header">
+                                <div class="core-icon-large">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="core-main-info">
+                                    <h2>Core Línea 4</h2>
+                                    <p>Sistema completo ISE + C702 + e801 + e801</p>
+                                </div>
+                                <div class="core-main-status" id="core3-status">
+                                    <span class="status-dot operational"></span>
+                                </div>
+                            </div>
+                            <div class="core-main-details">
+                                <div class="detail-item">
+                                    <span class="label">Estado del Core:</span>
+                                    <span class="value" id="core3-state">Operativo</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Última modificación:</span>
+                                    <span class="value" id="core3-last-change">15:30 - 15/01/2024</span>
+                                </div>
+                            </div>
+                            <div class="core-comments">
+                                <div class="comments-header">
+                                    <h5><i class="fas fa-comments"></i> Comentarios del Core</h5>
+                                    <button class="btn btn-sm btn-primary" onclick="addCoreComment('core3')">
+                                        <i class="fas fa-plus"></i> Agregar
+                                    </button>
+                                </div>
+                                <div class="comments-list" id="core3-comments">
+                                    <div class="comment-item">
+                                        <div class="comment-text">Sistema funcionando correctamente</div>
+                                        <div class="comment-meta">15:30 - 15/01/2024</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="core-main-actions">
+                                <button class="btn btn-secondary" onclick="changeCoreStatus('core3')">
+                                    <i class="fas fa-cog"></i> Cambiar Estado del Core
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modules-within-core">
+                            <h3>Módulos del Core</h3>
+                            <div class="modules-grid-internal">
+                                <!-- ISE Module -->
+                                <div class="module-card-internal" data-module="core3-ise">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-flask"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>ISE</h4>
+                                            <p>Electrolitos</p>
+                                        </div>
+                                        <div class="module-status" id="core3-ise-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core3-ise-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core3-ise-last-change">15:30 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core3-ise')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core3-ise-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core3-ise')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- C702 Module -->
+                                <div class="module-card-internal" data-module="core3-c702">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-vial"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>C702</h4>
+                                            <p>Química Clínica</p>
+                                        </div>
+                                        <div class="module-status" id="core3-c702-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core3-c702-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core3-c702-last-change">15:28 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core3-c702')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core3-c702-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core3-c702')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- e801 #1 Module -->
+                                <div class="module-card-internal" data-module="core3-e801-1">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-dna"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>e801 #1</h4>
+                                            <p>Inmunoensayos</p>
+                                        </div>
+                                        <div class="module-status" id="core3-e801-1-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core3-e801-1-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core3-e801-1-last-change">15:25 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core3-e801-1')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core3-e801-1-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core3-e801-1')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- e801 #2 Module -->
+                                <div class="module-card-internal" data-module="core3-e801-2">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-dna"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>e801 #2</h4>
+                                            <p>Inmunoensayos</p>
+                                        </div>
+                                        <div class="module-status" id="core3-e801-2-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core3-e801-2-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core3-e801-2-last-change">15:32 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core3-e801-2')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core3-e801-2-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core3-e801-2')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Core 4 -->
+                <div class="core-system" data-core="core4">
+                    <div class="core-container">
+                        <div class="core-header-section">
+                            <div class="core-main-header">
+                                <div class="core-icon-large">
+                                    <i class="fas fa-server"></i>
+                                </div>
+                                <div class="core-main-info">
+                                    <h2>Core Línea 5</h2>
+                                    <p>Sistema completo ISE + C702 + e801 + e801</p>
+                                </div>
+                                <div class="core-main-status" id="core4-status">
+                                    <span class="status-dot operational"></span>
+                                </div>
+                            </div>
+                            <div class="core-main-details">
+                                <div class="detail-item">
+                                    <span class="label">Estado del Core:</span>
+                                    <span class="value" id="core4-state">Operativo</span>
+                                </div>
+                                <div class="detail-item">
+                                    <span class="label">Última modificación:</span>
+                                    <span class="value" id="core4-last-change">15:30 - 15/01/2024</span>
+                                </div>
+                            </div>
+                            <div class="core-comments">
+                                <div class="comments-header">
+                                    <h5><i class="fas fa-comments"></i> Comentarios del Core</h5>
+                                    <button class="btn btn-sm btn-primary" onclick="addCoreComment('core4')">
+                                        <i class="fas fa-plus"></i> Agregar
+                                    </button>
+                                </div>
+                                <div class="comments-list" id="core4-comments">
+                                    <div class="comment-item">
+                                        <div class="comment-text">Sistema funcionando correctamente</div>
+                                        <div class="comment-meta">15:30 - 15/01/2024</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="core-main-actions">
+                                <button class="btn btn-secondary" onclick="changeCoreStatus('core4')">
+                                    <i class="fas fa-cog"></i> Cambiar Estado del Core
+                                </button>
+                            </div>
+                        </div>
+                        <div class="modules-within-core">
+                            <h3>Módulos del Core</h3>
+                            <div class="modules-grid-internal">
+                                <!-- ISE Module -->
+                                <div class="module-card-internal" data-module="core4-ise">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-flask"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>ISE</h4>
+                                            <p>Electrolitos</p>
+                                        </div>
+                                        <div class="module-status" id="core4-ise-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core4-ise-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core4-ise-last-change">15:30 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core4-ise')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core4-ise-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core4-ise')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- C702 Module -->
+                                <div class="module-card-internal" data-module="core4-c702">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-vial"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>C702</h4>
+                                            <p>Química Clínica</p>
+                                        </div>
+                                        <div class="module-status" id="core4-c702-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core4-c702-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core4-c702-last-change">15:28 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core4-c702')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core4-c702-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core4-c702')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- e801 #1 Module -->
+                                <div class="module-card-internal" data-module="core4-e801-1">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-dna"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>e801 #1</h4>
+                                            <p>Inmunoensayos</p>
+                                        </div>
+                                        <div class="module-status" id="core4-e801-1-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core4-e801-1-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core4-e801-1-last-change">15:25 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core4-e801-1')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core4-e801-1-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core4-e801-1')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                                <!-- e801 #2 Module -->
+                                <div class="module-card-internal" data-module="core4-e801-2">
+                                    <div class="module-header">
+                                        <div class="module-icon">
+                                            <i class="fas fa-dna"></i>
+                                        </div>
+                                        <div class="module-info">
+                                            <h4>e801 #2</h4>
+                                            <p>Inmunoensayos</p>
+                                        </div>
+                                        <div class="module-status" id="core4-e801-2-status">
+                                            <span class="status-dot operational"></span>
+                                        </div>
+                                    </div>
+                                    <div class="module-details">
+                                        <div class="detail-item">
+                                            <span class="label">Estado:</span>
+                                            <span class="value" id="core4-e801-2-state">Operativo</span>
+                                        </div>
+                                        <div class="detail-item">
+                                            <span class="label">Última modificación:</span>
+                                            <span class="value" id="core4-e801-2-last-change">15:32 - 15/01/2024</span>
+                                        </div>
+                                    </div>
+                                    <div class="module-comments">
+                                        <div class="comments-header">
+                                            <h5><i class="fas fa-comments"></i> Comentarios</h5>
+                                            <button class="btn btn-sm btn-primary" onclick="addComment('core4-e801-2')">
+                                                <i class="fas fa-plus"></i> Agregar
+                                            </button>
+                                        </div>
+                                        <div class="comments-list" id="core4-e801-2-comments">
+                                        </div>
+                                    </div>
+                                    <div class="module-actions">
+                                        <button class="btn btn-sm btn-secondary" onclick="changeModuleStatus('core4-e801-2')">
+                                            <i class="fas fa-cog"></i> Cambiar Estado
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+        </main>
+
+        <!-- Status Change Modal -->
+        <div id="statusModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="modalTitle">Cambiar Estado</h3>
+                    <span class="close" onclick="closeModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="module-info-modal">
+                        <h4 id="modalModuleName"></h4>
+                        <p id="modalModuleType"></p>
+                    </div>
+                    <div class="status-options">
+                        <label class="status-option">
+                            <input type="radio" name="newStatus" value="operational">
+                            <span class="status-indicator">
+                                <span class="status-dot operational"></span>
+                                <span>Operativo</span>
+                            </span>
+                        </label>
+                        <label class="status-option">
+                            <input type="radio" name="newStatus" value="standby">
+                            <span class="status-indicator">
+                                <span class="status-dot standby"></span>
+                                <span>Stand By</span>
+                            </span>
+                        </label>
+                        <label class="status-option">
+                            <input type="radio" name="newStatus" value="maintenance">
+                            <span class="status-indicator">
+                                <span class="status-dot maintenance"></span>
+                                <span>Mantenimiento</span>
+                            </span>
+                        </label>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeModal()">Cancelar</button>
+                        <button class="btn btn-primary" onclick="confirmStatusChange()">Confirmar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Comment Modal -->
+        <div id="commentModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3 id="commentModalTitle">Agregar Comentario</h3>
+                    <span class="close" onclick="closeCommentModal()">&times;</span>
+                </div>
+                <div class="modal-body">
+                    <div class="module-info-modal">
+                        <h4 id="commentModalModuleName"></h4>
+                        <p id="commentModalModuleType"></p>
+                    </div>
+                    <div class="comment-form">
+                        <label for="commentText">Comentario:</label>
+                        <textarea id="commentText" rows="4" placeholder="Escriba su comentario aquí..."></textarea>
+                    </div>
+                    <div class="modal-actions">
+                        <button class="btn btn-secondary" onclick="closeCommentModal()">Cancelar</button>
+                        <button class="btn btn-primary" onclick="saveComment()">Guardar</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
