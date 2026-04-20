@@ -1,0 +1,40 @@
+# Despliega Firebase Hosting cuando haces push a la rama main.
+#
+# Configuración en GitHub (una sola vez):
+# 1. Firebase Console → Configuración del proyecto (engranaje) → Cuentas de servicio
+# 2. "Generar nueva clave privada" → descargas un JSON
+# 3. En el repo: Settings → Secrets and variables → Actions → New repository secret
+#    Nombre: FIREBASE_SERVICE_ACCOUNT
+#    Valor: pega el contenido completo del archivo JSON (una sola línea está bien)
+#
+# La cuenta de servicio debe poder desplegar Hosting (la predeterminada de Admin SDK suele bastar).
+
+name: Deploy Firebase Hosting
+
+on:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Sync index-firebase → public (igual que deploy-firebase.bat)
+        run: cp index-firebase.html public/index.html
+
+      - name: Authenticate to Google Cloud
+        uses: google-github-actions/auth@v2
+        with:
+          credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
+
+      - name: Install Firebase CLI
+        run: npm install -g firebase-tools
+
+      - name: Deploy Hosting
+        run: firebase deploy --only hosting --project semaforo-rossi --non-interactive
