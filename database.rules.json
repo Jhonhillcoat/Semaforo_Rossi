@@ -1,0 +1,23 @@
+{
+  "rules": {
+    "lines": {
+      "$lineId": {
+        ".read": true,
+        ".write": true,
+        ".validate": "newData.hasChildren(['Core', 'ISE']) && (newData.child('Core').isString() || newData.child('ISE').isString())"
+      }
+    },
+    "notes": {
+      "$lineId": {
+        ".read": true,
+        ".write": true,
+        "$noteId": {
+          ".validate": "newData.hasChildren(['timestamp', 'dateStr', 'timeStr', 'text']) && newData.child('timestamp').isNumber() && newData.child('text').isString()"
+        }
+      }
+    }
+  }
+}
+
+
+

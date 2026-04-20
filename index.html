@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Semáforo Cobas 8000 - Monitor de Líneas</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.socket.io/4.6.1/socket.io.min.js"></script>
+    <style>
+        body {
+            overflow: hidden;
+        }
+        @media (max-width: 768px) {
+            body {
+                overflow-y: auto;
+            }
+        }
+        .chip {
+            transition: all 0.3s ease;
+            cursor: pointer;
+            user-select: none;
+        }
+        .chip:hover {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        .chip:active {
+            transform: scale(0.95);
+        }
+        .chip-disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
+        .chip-disabled:hover {
+            transform: scale(1);
+        }
+        .chip-operativo {
+            background-color: #22c55e;
+            color: white;
+        }
+        .chip-standby {
+            background-color: #eab308;
+            color: white;
+        }
+        .chip-desconectado {
+            background-color: #ef4444;
+            color: white;
+        }
+        .core-container {
+            border: 4px solid rgba(0,0,0,0.3);
+            border-radius: 16px;
+            padding: 16px;
+            background: rgba(255,255,255,0.1);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+        }
+        .core-chip {
+            font-weight: 700;
+            font-size: 20px;
+            padding: 16px 24px;
+            border-radius: 12px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+            min-width: 120px;
+            border: 3px solid rgba(0,0,0,0.2);
+        }
+        .core-chip:hover {
+            transform: scale(1.05);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.25);
+        }
+        .modules-wrapper {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            flex: 1;
+            justify-content: center;
+        }
+        .module-chip {
+            font-size: 17px;
+            padding: 14px 22px;
+            min-width: 110px;
+            text-align: center;
+        }
+        .line-card {
+            background: linear-gradient(135deg, #f8fafc 0%, #e2e8f0 100%);
+            border: 2px solid #cbd5e1;
+            border-radius: 12px;
+            box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1);
+        }
+        .kpi-badge {
+            border-radius: 8px;
+            padding: 8px 16px;
+            font-weight: 600;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        #app-container {
+            transform-origin: top left;
+        }
+        .connection-status {
+            position: fixed;
+            top: 10px;
+            right: 10px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.2);
+        }
+        .status-connected {
+            background: #22c55e;
+            color: white;
+        }
+        .status-disconnected {
+            background: #ef4444;
+            color: white;
+        }
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: white;
+            animation: pulse 2s infinite;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+        .notes-input {
+            background: white;
+            border: 2px solid #cbd5e1;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 15px;
+            color: #1f2937;
+            width: 100%;
+            min-height: 60px;
+            resize: vertical;
+            font-family: inherit;
+            transition: all 0.2s ease;
+        }
+        .notes-input:focus {
+            outline: none;
+            border-color: #3b82f6;
+            box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+        }
+        .notes-input::placeholder {
+            color: #9ca3af;
+        }
+        .add-note-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            padding: 8px 16px;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            margin-top: 8px;
+        }
+        .add-note-btn:hover {
+            background: #2563eb;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(59, 130, 246, 0.3);
+        }
+        .notes-panel {
+            background: #f1f5f9;
+            border-radius: 6px;
+            padding: 12px;
+            margin-top: 12px;
+            max-height: 150px;
+            overflow-y: auto;
+            font-size: 15px;
+        }
+        .note-entry {
+            background: white;
+            border-left: 3px solid #3b82f6;
+            padding: 10px;
+            margin-bottom: 8px;
+            border-radius: 4px;
+            position: relative;
+        }
+        .note-entry:last-child {
+            margin-bottom: 0;
+        }
+        .note-time {
+            color: #64748b;
+            font-size: 12px;
+            font-weight: 600;
+            margin-bottom: 4px;
+        }
+        .note-text {
+            color: #1f2937;
+            line-height: 1.5;
+            font-size: 15px;
+        }
+        .notes-empty {
+            color: #94a3b8;
+            text-align: center;
+            padding: 12px;
+            font-style: italic;
+            font-size: 14px;
+        }
+        /* Estilos para el popup de finalización de beta */
+        .beta-popup-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 10000;
+            animation: fadeIn 0.3s ease-in;
+        }
+        .beta-popup-content {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+            border-radius: 16px;
+            padding: 32px;
+            max-width: 500px;
+            width: 90%;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            text-align: center;
+            animation: slideUp 0.4s ease-out;
+            border: 3px solid #3b82f6;
+        }
+        .beta-popup-content h2 {
+            font-size: 28px;
+            font-weight: 700;
+            color: #1f2937;
+            margin-bottom: 16px;
+        }
+        .beta-popup-content p {
+            font-size: 18px;
+            color: #4b5563;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+        .beta-popup-close-btn {
+            background: #3b82f6;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            padding: 12px 32px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        .beta-popup-close-btn:hover {
+            background: #2563eb;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4);
+        }
+        .beta-popup-hidden {
+            display: none;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        @keyframes slideUp {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+    </style>
+</head>
+<body class="bg-gray-900 text-gray-100">
+    <!-- Popup de finalización de sesión de prueba -->
+    <div id="beta-popup" class="beta-popup-overlay">
+        <div class="beta-popup-content">
+            <h2>🎉 Finalización Sesión de Prueba</h2>
+            <p>El proyecto ha completado exitosamente su fase beta. Gracias por ser parte de esta experiencia.</p>
+            <button class="beta-popup-close-btn" onclick="closeBetaPopup()">Entendido</button>
+        </div>
+    </div>
+
+    <!-- Indicador de conexión -->
+    <div id="connection-status" class="connection-status status-disconnected">
+        <div class="status-dot"></div>
+        <span id="status-text">Desconectado</span>
+    </div>
+    
+    <div id="app-container" class="min-h-screen p-4">
+        <!-- Header con KPIs -->
+        <header class="mb-4">
+            <div class="flex flex-col md:flex-row justify-between items-center gap-4">
+                <h1 class="text-2xl md:text-3xl font-bold text-white">
+                    🔬 Semáforo Cobas 8000
+                </h1>
+                <div class="flex flex-wrap gap-3 items-center">
+                    <div class="kpi-badge chip-operativo">
+                        <span class="text-xs md:text-sm">Operativos: </span>
+                        <span id="kpi-operativo" class="text-lg md:text-xl">0</span>
+                    </div>
+                    <div class="kpi-badge chip-standby">
+                        <span class="text-xs md:text-sm">Stand By: </span>
+                        <span id="kpi-standby" class="text-lg md:text-xl">0</span>
+                    </div>
+                    <div class="kpi-badge chip-desconectado">
+                        <span class="text-xs md:text-sm">Desconectados: </span>
+                        <span id="kpi-desconectado" class="text-lg md:text-xl">0</span>
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Grid de Líneas 2×2 -->
+        <main id="lines-grid" class="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6" role="main">
+            <!-- Las líneas se generarán dinámicamente -->
+        </main>
+    </div>
+
+    <script>
+        // ============ SOCKET.IO CONNECTION ============
+        let socket = null;
+        let isConnected = false;
+
+        // ============ CONSTANTES ============
+        const LINES_CONFIG = {
+            1: { name: 'Línea 1', modules: ['Core', 'ISE', 'C502', 'C702', 'e801'] },
+            2: { name: 'Línea 2', modules: ['Core', 'ISE', 'C702', 'e801', 'e801'] },
+            4: { name: 'Línea 4', modules: ['Core', 'ISE', 'C702', 'e801', 'e801'] },
+            5: { name: 'Línea 5', modules: ['Core', 'ISE', 'C702', 'e801', 'e801'] }
+        };
+
+        const ESTADOS = {
+            OPERATIVO: 'Operativo',
+            STANDBY: 'Stand By',
+            DESCONECTADO: 'Desconectado'
+        };
+
+        const STATE_CLASSES = {
+            [ESTADOS.OPERATIVO]: 'chip-operativo',
+            [ESTADOS.STANDBY]: 'chip-standby',
+            [ESTADOS.DESCONECTADO]: 'chip-desconectado'
+        };
+
+        const STATE_ORDER = [ESTADOS.OPERATIVO, ESTADOS.STANDBY, ESTADOS.DESCONECTADO];
+
+        // ============ ESTADO GLOBAL ============
+        const linesState = {
+            1: { Core: ESTADOS.DESCONECTADO, ISE: ESTADOS.DESCONECTADO, C502: ESTADOS.DESCONECTADO, C702: ESTADOS.DESCONECTADO, e801: ESTADOS.DESCONECTADO },
+            2: { Core: ESTADOS.DESCONECTADO, ISE: ESTADOS.DESCONECTADO, C702: ESTADOS.DESCONECTADO, e801_1: ESTADOS.DESCONECTADO, e801_2: ESTADOS.DESCONECTADO },
+            4: { Core: ESTADOS.DESCONECTADO, ISE: ESTADOS.DESCONECTADO, C702: ESTADOS.DESCONECTADO, e801_1: ESTADOS.DESCONECTADO, e801_2: ESTADOS.DESCONECTADO },
+            5: { Core: ESTADOS.DESCONECTADO, ISE: ESTADOS.DESCONECTADO, C702: ESTADOS.DESCONECTADO, e801_1: ESTADOS.DESCONECTADO, e801_2: ESTADOS.DESCONECTADO }
+        };
+
+        // ============ NOTAS INFORMATIVAS ============
+        const lineNotes = {
+            1: [],
+            2: [],
+            4: [],
+            5: []
+        };
+
+        // ============ CARGAR NOTAS DE LOCALSTORAGE ============
+        function loadNotesFromStorage() {
+            try {
+                const stored = localStorage.getItem('cobasLineNotes');
+                if (stored) {
+                    const parsed = JSON.parse(stored);
+                    Object.keys(lineNotes).forEach(lineId => {
+                        if (parsed[lineId]) {
+                            lineNotes[lineId] = parsed[lineId];
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error cargando notas:', error);
+            }
+        }
+
+        // ============ GUARDAR NOTAS EN LOCALSTORAGE ============
+        function saveNotesToStorage() {
+            try {
+                localStorage.setItem('cobasLineNotes', JSON.stringify(lineNotes));
+            } catch (error) {
+                console.error('Error guardando notas:', error);
+            }
+        }
+
+        // ============ INICIALIZACIÓN UI ============
+        function initUI() {
+            const grid = document.getElementById('lines-grid');
+            grid.innerHTML = '';
+
+            Object.entries(LINES_CONFIG).forEach(([lineId, config]) => {
+                const lineCard = document.createElement('div');
+                lineCard.className = 'line-card p-4 md:p-6';
+                lineCard.setAttribute('role', 'region');
+                lineCard.setAttribute('aria-label', config.name);
+
+                // Título de línea
+                const title = document.createElement('h2');
+                title.className = 'text-xl md:text-2xl font-bold mb-4 text-gray-800';
+                title.textContent = config.name;
+
+                // Contenedor principal con Core y módulos al mismo nivel
+                const coreContainer = document.createElement('div');
+                coreContainer.className = 'core-container mb-4';
+                coreContainer.id = `line-${lineId}-core`;
+
+                // Core Chip (al lado izquierdo)
+                const coreChip = document.createElement('div');
+                coreChip.className = 'chip core-chip';
+                coreChip.id = `chip-${lineId}-Core`;
+                coreChip.textContent = '⚙️ CORE';
+                coreChip.setAttribute('role', 'button');
+                coreChip.setAttribute('tabindex', '0');
+                coreChip.dataset.lineId = lineId;
+                coreChip.dataset.moduleKey = 'Core';
+                coreChip.addEventListener('click', () => handleChipClick(lineId, 'Core'));
+                coreChip.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' || e.key === ' ') {
+                        e.preventDefault();
+                        handleChipClick(lineId, 'Core');
+                    }
+                });
+
+                // Contenedor de módulos (al lado derecho)
+                const modulesWrapper = document.createElement('div');
+                modulesWrapper.className = 'modules-wrapper';
+                modulesWrapper.id = `line-${lineId}-modules`;
+
+                // Crear chips para módulos (sin Core)
+                config.modules.slice(1).forEach((moduleName, index) => {
+                    const moduleKey = getModuleKey(lineId, moduleName, index + 1, config.modules);
+                    const chip = createModuleChip(lineId, moduleKey, moduleName);
+                    modulesWrapper.appendChild(chip);
+                });
+
+                coreContainer.appendChild(coreChip);
+                coreContainer.appendChild(modulesWrapper);
+
+                // Sección de notas informativas
+                const notesSection = document.createElement('div');
+                notesSection.className = 'mt-4';
+
+                const notesLabel = document.createElement('label');
+                notesLabel.className = 'block text-sm font-bold text-gray-700 mb-2';
+                notesLabel.textContent = '📝 Notas Informativas';
+                notesLabel.setAttribute('for', `notes-input-${lineId}`);
+
+                const notesTextarea = document.createElement('textarea');
+                notesTextarea.id = `notes-input-${lineId}`;
+                notesTextarea.className = 'notes-input';
+                notesTextarea.placeholder = 'Escribe información relevante sobre esta línea...';
+                notesTextarea.setAttribute('aria-label', `Notas para ${config.name}`);
+
+                const addBtn = document.createElement('button');
+                addBtn.className = 'add-note-btn';
+                addBtn.textContent = '➕ Agregar Nota';
+                addBtn.onclick = () => addNote(lineId);
+
+                const notesPanel = document.createElement('div');
+                notesPanel.id = `notes-panel-${lineId}`;
+                notesPanel.className = 'notes-panel';
+                notesPanel.innerHTML = '<div class="notes-empty">No hay notas agregadas</div>';
+
+                notesSection.appendChild(notesLabel);
+                notesSection.appendChild(notesTextarea);
+                notesSection.appendChild(addBtn);
+                notesSection.appendChild(notesPanel);
+
+                // Ensamblar la tarjeta
+                lineCard.appendChild(title);
+                lineCard.appendChild(coreContainer);
+                lineCard.appendChild(notesSection);
+                grid.appendChild(lineCard);
+            });
+
+            updateAllChips();
+            updateKPIs();
+            renderAllNotes();
+            scaleToFit();
+        }
+
+        // ============ CREAR CHIP DE MÓDULO ============
+        function createModuleChip(lineId, moduleKey, displayName) {
+            const chip = document.createElement('div');
+            chip.className = 'chip module-chip rounded-lg font-bold';
+            chip.id = `chip-${lineId}-${moduleKey}`;
+            chip.setAttribute('role', 'button');
+            chip.setAttribute('tabindex', '0');
+            chip.dataset.lineId = lineId;
+            chip.dataset.moduleKey = moduleKey;
+
+            const label = document.createElement('span');
+            label.textContent = displayName;
+            chip.appendChild(label);
+
+            // Event listeners para clic y teclado
+            chip.addEventListener('click', () => handleChipClick(lineId, moduleKey));
+            chip.addEventListener('keypress', (e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault();
+                    handleChipClick(lineId, moduleKey);
+                }
+            });
+
+            return chip;
+        }
+
+        // ============ MANEJAR CLIC EN CHIP ============
+        function handleChipClick(lineId, moduleKey) {
+            const coreState = linesState[lineId].Core;
+            
+            // Si no es Core y el Core no está Operativo, no permitir cambios
+            if (moduleKey !== 'Core' && coreState !== ESTADOS.OPERATIVO) {
+                return;
+            }
+
+            // Ciclar al siguiente estado
+            const currentState = linesState[lineId][moduleKey];
+            const currentIndex = STATE_ORDER.indexOf(currentState);
+            const nextIndex = (currentIndex + 1) % STATE_ORDER.length;
+            const nextState = STATE_ORDER[nextIndex];
+
+            // Emitir cambio al servidor (si está conectado)
+            if (socket && isConnected) {
+                socket.emit('module_state_change', {
+                    lineId: parseInt(lineId),
+                    moduleKey,
+                    newState
+                });
+            } else {
+                // Modo offline: actualizar solo localmente
+                applyStateChange(lineId, moduleKey, nextState);
+            }
+        }
+
+        // ============ APLICAR CAMBIO DE ESTADO ============
+        function applyStateChange(lineId, moduleKey, newState) {
+            // Actualizar estado local
+            linesState[lineId][moduleKey] = newState;
+
+            // Si es Core, actualizar toda la línea
+            if (moduleKey === 'Core') {
+                updateAllChips();
+            } else {
+                updateChip(lineId, moduleKey);
+            }
+
+            updateKPIs();
+        }
+
+        // ============ AGREGAR NOTA ============
+        function addNote(lineId) {
+            const textarea = document.getElementById(`notes-input-${lineId}`);
+            if (!textarea) return;
+
+            const noteText = textarea.value.trim();
+            if (!noteText) {
+                alert('Por favor escribe una nota antes de agregar');
+                return;
+            }
+
+            const now = new Date();
+            const timeStr = now.toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
+            const dateStr = now.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+
+            const note = {
+                timestamp: now.getTime(),
+                dateStr,
+                timeStr,
+                text: noteText
+            };
+
+            // Emitir al servidor (si está conectado)
+            if (socket && isConnected) {
+                socket.emit('add_note', {
+                    lineId: parseInt(lineId),
+                    note
+                });
+                textarea.value = '';
+            } else {
+                // Modo offline: guardar solo localmente
+                applyNoteAdd(lineId, note);
+                textarea.value = '';
+            }
+        }
+
+        // ============ APLICAR NOTA AGREGADA ============
+        function applyNoteAdd(lineId, note) {
+            lineNotes[lineId].unshift(note);
+
+            // Limitar a 20 notas por línea
+            if (lineNotes[lineId].length > 20) {
+                lineNotes[lineId] = lineNotes[lineId].slice(0, 20);
+            }
+
+            saveNotesToStorage();
+            renderNotes(lineId);
+        }
+
+        // ============ RENDERIZAR NOTAS ============
+        function renderNotes(lineId) {
+            const panel = document.getElementById(`notes-panel-${lineId}`);
+            if (!panel) return;
+
+            const notes = lineNotes[lineId];
+
+            if (notes.length === 0) {
+                panel.innerHTML = '<div class="notes-empty">No hay notas agregadas</div>';
+                return;
+            }
+
+            let html = '';
+            notes.forEach(note => {
+                html += `
+                    <div class="note-entry">
+                        <div class="note-time">${note.dateStr} - ${note.timeStr}</div>
+                        <div class="note-text">${note.text}</div>
+                    </div>
+                `;
+            });
+
+            panel.innerHTML = html;
+        }
+
+        // ============ RENDERIZAR TODAS LAS NOTAS ============
+        function renderAllNotes() {
+            Object.keys(lineNotes).forEach(lineId => {
+                renderNotes(lineId);
+            });
+        }
+
+        // ============ OBTENER CLAVE DE MÓDULO ============
+        function getModuleKey(lineId, moduleName, index, allModules) {
+            // Para diferenciar múltiples e801 en la misma línea
+            if (moduleName === 'e801') {
+                const e801Count = allModules.slice(0, index + 1).filter(m => m === 'e801').length;
+                return e801Count > 1 ? `e801_${e801Count}` : 'e801_1';
+            }
+            return moduleName;
+        }
+
+        // ============ APLICAR REGLA DE CORE ============
+        function getEffectiveState(lineId, moduleKey) {
+            const coreState = linesState[lineId].Core;
+            
+            // Si el Core no está Operativo, todos los módulos heredan su estado
+            if (coreState !== ESTADOS.OPERATIVO && moduleKey !== 'Core') {
+                return {
+                    state: coreState,
+                    conditioned: true
+                };
+            }
+            
+            return {
+                state: linesState[lineId][moduleKey] || ESTADOS.DESCONECTADO,
+                conditioned: false
+            };
+        }
+
+        // ============ ACTUALIZAR CHIP ============
+        function updateChip(lineId, moduleKey) {
+            const chip = document.getElementById(`chip-${lineId}-${moduleKey}`);
+            if (!chip) return;
+
+            const { state, conditioned } = getEffectiveState(lineId, moduleKey);
+            
+            // Remover clases de estado anteriores
+            Object.values(STATE_CLASSES).forEach(cls => chip.classList.remove(cls));
+            chip.classList.remove('chip-disabled');
+            
+            // Aplicar nueva clase
+            chip.classList.add(STATE_CLASSES[state]);
+            
+            // Actualizar borde del contenedor Core si es el Core
+            if (moduleKey === 'Core') {
+                const coreContainer = document.getElementById(`line-${lineId}-core`);
+                if (coreContainer) {
+                    if (state === ESTADOS.OPERATIVO) {
+                        coreContainer.style.borderColor = '#22c55e';
+                    } else if (state === ESTADOS.STANDBY) {
+                        coreContainer.style.borderColor = '#eab308';
+                    } else {
+                        coreContainer.style.borderColor = '#ef4444';
+                    }
+                }
+            }
+            
+            // Si está condicionado, deshabilitar interacción
+            if (conditioned) {
+                chip.classList.add('chip-disabled');
+                chip.title = '⚠️ Condicionado por Core - No editable';
+                chip.setAttribute('aria-label', `${chip.textContent} - ${state} (Condicionado por Core)`);
+                chip.setAttribute('aria-disabled', 'true');
+            } else {
+                chip.title = `${state} - Clic para cambiar`;
+                chip.setAttribute('aria-label', `${chip.textContent} - ${state} - Clic para cambiar`);
+                chip.removeAttribute('aria-disabled');
+            }
+        }
+
+        // ============ ACTUALIZAR TODOS LOS CHIPS ============
+        function updateAllChips() {
+            Object.keys(LINES_CONFIG).forEach(lineId => {
+                Object.keys(linesState[lineId]).forEach(moduleKey => {
+                    updateChip(lineId, moduleKey);
+                });
+            });
+        }
+
+        // ============ ACTUALIZAR KPIs ============
+        function updateKPIs() {
+            let operativo = 0, standby = 0, desconectado = 0;
+
+            Object.keys(LINES_CONFIG).forEach(lineId => {
+                Object.keys(linesState[lineId]).forEach(moduleKey => {
+                    const { state } = getEffectiveState(lineId, moduleKey);
+                    if (state === ESTADOS.OPERATIVO) operativo++;
+                    else if (state === ESTADOS.STANDBY) standby++;
+                    else if (state === ESTADOS.DESCONECTADO) desconectado++;
+                });
+            });
+
+            document.getElementById('kpi-operativo').textContent = operativo;
+            document.getElementById('kpi-standby').textContent = standby;
+            document.getElementById('kpi-desconectado').textContent = desconectado;
+        }
+
+        // ============ ESCALAR PARA FIT DESKTOP ============
+        function scaleToFit() {
+            if (window.innerWidth < 768) return; // Mobile: permitir scroll
+
+            const container = document.getElementById('app-container');
+            const viewportHeight = window.innerHeight;
+            const viewportWidth = window.innerWidth;
+            
+            // Resetear escala
+            container.style.transform = 'scale(1)';
+            
+            // Obtener dimensiones reales
+            const containerHeight = container.scrollHeight;
+            const containerWidth = container.scrollWidth;
+            
+            // Calcular escala necesaria
+            const scaleY = viewportHeight / (containerHeight + 20);
+            const scaleX = viewportWidth / (containerWidth + 20);
+            const scale = Math.min(scaleY, scaleX, 1); // No agrandar, solo reducir
+            
+            if (scale < 1) {
+                container.style.transform = `scale(${scale})`;
+                container.style.width = `${100 / scale}%`;
+                container.style.height = `${100 / scale}%`;
+            }
+        }
+
+        // ============ INICIALIZAR SOCKET.IO ============
+        function initSocket() {
+            // Conectar al servidor (ajusta la URL según tu configuración)
+            socket = io(window.location.origin);
+
+            // ============ EVENTOS DE CONEXIÓN ============
+            socket.on('connect', () => {
+                console.log('✅ Conectado al servidor');
+                isConnected = true;
+                updateConnectionStatus(true);
+            });
+
+            socket.on('disconnect', () => {
+                console.log('❌ Desconectado del servidor');
+                isConnected = false;
+                updateConnectionStatus(false);
+            });
+
+            // ============ RECIBIR ESTADO INICIAL ============
+            socket.on('initial_state', (data) => {
+                console.log('📦 Estado inicial recibido del servidor');
+                
+                // Actualizar estados de líneas
+                if (data.lines) {
+                    Object.keys(data.lines).forEach(lineId => {
+                        Object.keys(data.lines[lineId]).forEach(moduleKey => {
+                            if (linesState[lineId] && linesState[lineId][moduleKey] !== undefined) {
+                                linesState[lineId][moduleKey] = data.lines[lineId][moduleKey];
+                            }
+                        });
+                    });
+                    updateAllChips();
+                    updateKPIs();
+                }
+
+                // Actualizar notas
+                if (data.notes) {
+                    Object.keys(data.notes).forEach(lineId => {
+                        if (lineNotes[lineId]) {
+                            lineNotes[lineId] = data.notes[lineId];
+                        }
+                    });
+                    renderAllNotes();
+                }
+            });
+
+            // ============ RECIBIR CAMBIO DE ESTADO ============
+            socket.on('module_state_changed', (data) => {
+                const { lineId, moduleKey, newState } = data;
+                console.log(`🔄 Cambio recibido: Línea ${lineId} - ${moduleKey}: ${newState}`);
+                applyStateChange(lineId, moduleKey, newState);
+            });
+
+            // ============ RECIBIR NOTA AGREGADA ============
+            socket.on('note_added', (data) => {
+                const { lineId, note } = data;
+                console.log(`📝 Nota recibida para Línea ${lineId}`);
+                applyNoteAdd(lineId, note);
+            });
+        }
+
+        // ============ ACTUALIZAR INDICADOR DE CONEXIÓN ============
+        function updateConnectionStatus(connected) {
+            const statusEl = document.getElementById('connection-status');
+            const statusText = document.getElementById('status-text');
+            
+            if (connected) {
+                statusEl.className = 'connection-status status-connected';
+                statusText.textContent = 'Conectado';
+            } else {
+                statusEl.className = 'connection-status status-disconnected';
+                statusText.textContent = 'Desconectado';
+            }
+        }
+
+        // ============ POPUP DE FINALIZACIÓN DE BETA ============
+        function closeBetaPopup() {
+            const popup = document.getElementById('beta-popup');
+            if (popup) {
+                popup.classList.add('beta-popup-hidden');
+            }
+        }
+
+        // Cerrar popup al hacer clic fuera del contenido
+        document.addEventListener('DOMContentLoaded', () => {
+            const popup = document.getElementById('beta-popup');
+            if (popup) {
+                popup.addEventListener('click', (e) => {
+                    if (e.target === popup) {
+                        closeBetaPopup();
+                    }
+                });
+            }
+        });
+
+        // ============ EVENTOS WINDOW ============
+        window.addEventListener('resize', scaleToFit);
+        window.addEventListener('load', () => {
+            loadNotesFromStorage();
+            initUI();
+            initSocket(); // Iniciar conexión Socket.IO
+        });
+    </script>
+</body>
+</html>
+
